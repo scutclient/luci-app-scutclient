@@ -27,12 +27,6 @@ function index()
 			translate("日志"),
 			30
 		).leaf = true
-		
-		entry({"admin", "scutclient", "about"},
-			call("action_about"),
-			translate("关于"),
-			40
-		).leaf = true
 end
 
 
@@ -52,7 +46,13 @@ function action_logs()
 	local logs = nixio.fs.readfile(logfile) or ""
 	local backuplogs = nixio.fs.readfile(backuplogfile) or ""
 	local dirname = "/tmp/scutclient-log-"..os.date("%Y%m%d-%H%M%S")
-	
+	luci.template.render("scutclient/logs", {
+		logs=logs,
+		backuplogs=backuplogs,
+		dirname=dirname,
+		logfile=logfile
+	})
+
 	local tar_files = {
 		"/etc/config/wireless",
 		"/etc/config/network",
@@ -79,20 +79,6 @@ function action_logs()
 
 
 	local short_dir = "./"..nixio.fs.basename(tar_dir)
-	luci.sys.call("cd /tmp && tar -cvf "..short_dir..".tar "..short_dir.." > /dev/null")
+	luci.sys.call("cd /tmp && tar -cvf "..short_dir..".tar "..short_dir)
 	luci.sys.call("ln -sf "..tar_dir..".tar /www/"..nixio.fs.basename(tar_dir)..".tar")
-	
-	luci.template.render("scutclient/logs", {
-		logs=logs,
-		backuplogs=backuplogs,
-		dirname=dirname,
-		logfile=logfile
-	})
-end
-
-function action_about()
-	luci.template.render("scutclient/status")
-	if luci.http.formvalue("logoff") == "1" then
-		luci.sys.call("/etc/init.d/scutclient stop > /dev/null")
-	end
 end

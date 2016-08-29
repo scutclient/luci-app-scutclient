@@ -45,6 +45,11 @@ scut_option_plugin_redial = scut_option:option(Flag, "plugin_redial", translate(
 scut_option_plugin_redial.addremove = false
 scut_option_plugin_redial.rmempty = false
 
+
+scut_option_debug = scut_option:option(Flag, "debug", translate("打开调试日志"))
+scut_option_debug.addremove = false
+scut_option_debug.rmempty = false
+
 scut_option_mode = scut_option:option(ListValue, "mode", translate("客户端选择"))
 scut_option_mode.rmempty = false
 --scut_option_mode:value("Young") -- No longer be used
@@ -115,7 +120,7 @@ local dhcp_hostnames = string.split(luci.sys.exec("cat /tmp/dhcp.leases|awk {'pr
 
 scut_drcom_hostname:value(random_hostname)
 scut_drcom_hostname:value(dhcp_hostnames[1])
-scut_drcom_hostname.default = random_hostname
+
 
 scut_drcom_delay = scut_drcom:option(Value, "delay", translate("开机延时（秒）后拨号"))
 scut_drcom_delay.rmempty = false
