@@ -120,7 +120,7 @@ local dhcp_hostnames = string.split(luci.sys.exec("cat /tmp/dhcp.leases|awk {'pr
 
 scut_drcom_hostname:value(random_hostname)
 scut_drcom_hostname:value(dhcp_hostnames[1])
-
+scut_drcom_hostname.default = random_hostname
 
 scut_drcom_delay = scut_drcom:option(Value, "delay", translate("开机延时（秒）后拨号"))
 scut_drcom_delay.rmempty = false
