@@ -2,7 +2,6 @@
 -- LuCI by libc0607 (libc0607@gmail.com)
 -- 华工路由群：262939451
 
-require("luci.ip")
 local network_status = {}
 network_status.ipaddr = luci.sys.exec("uci get network.wan.ipaddr")
 network_status.netmask = luci.sys.exec("uci get network.wan.netmask")
@@ -49,11 +48,11 @@ end
 if string.sub(luci.sys.exec("uci get network.wan.proto"), 1, 6) ~= "static" then
 	wanip = "WAN口不是静态地址"
 else
-	wanip = "<p>IP地址 / 子网掩码 / 网关："..network_status.ipaddr.."/ "
-	  ..network_status.netmask.."/ "
-	  ..network_status.gateway.."</p>"
-	  .."<p>DNS:      "..network_status.dns.."</p>"
-	  .."<p>MAC:      "..network_status.macaddr.."</p>"
+	wanip = '<p id="status_ipaddr">IP地址 ：'..network_status.ipaddr..'</p>'
+	  ..'<p id="status_netmask">子网掩码 ：'..network_status.netmask..'</p>'
+	  ..'<p id="status_gateway">网关 ：'..network_status.gateway..'</p>'
+	  ..'<p id="status_dns">DNS :      '..network_status.dns..'</p>'
+	  ..'<p id="status_macaddr">MAC :      '..network_status.macaddr..'</p>'
 end
 
 -- 客户端信息
@@ -64,14 +63,6 @@ client_version = get_client_version("scutclient")
 -- 重拨/下线
 logoff = luci.dispatcher.build_url("admin/scutclient/status").."?logoff=1"
 scut_status = translate("scutclient ")..get_client_status("scutclient")
-
-
-local network_is_correct = ""
-local netaddr_from_ip = luci.ip.new(network_status.ipaddr, network_status.netmask):network()
-local netaddr_from_gateway = luci.ip.new(network_status.gateway, network_status.netmask):network()
-if netaddr_from_ip ~= netaddr_from_gateway then
-	network_is_correct = "<p><font color=\"red\">IP地址和网关不在同一网段内!!</font></p>" 
-end
 %>
 
 <%+header%>
@@ -94,5 +85,24 @@ end
 <p>Drcom版本： <%=luci.sys.exec("uci get scutclient.@drcom[0].version")%></p>
 <p>Hash：      <%=luci.sys.exec("uci get scutclient.@drcom[0].hash")%></p>
 <p>服务器IP：  <%=luci.sys.exec("uci get scutclient.@drcom[0].server_auth_ip")%></p>
-
+<script type="text/javascript" language="javascript">
+	var ip = document.getElementById("status_ipaddr").innerHTML;
+	var gateway = document.getElementById("status_gateway").innerHTML;
+	var isCorrect = true;
+	for (var i=0;i<3;i++)
+	{
+		isCorrect = isCorrect && (parseInt(ip.match(/\d+/g)[i]) == parseInt(gateway.match(/\d+/g)[i]));
+	}
+	if(!isCorrect)
+	{
+		alert("IP地址 和 网关 前三位不一致，请仔细检查！");
+		document.getElementById("status_ipaddr").style.color="red";
+		document.getElementById("status_gateway").style.color="red";
+	}
+	else
+	{
+		document.getElementById("status_ipaddr").style.color="black";
+		document.getElementById("status_gateway").style.color="black";
+	}
+</script>
 <%+footer%>
