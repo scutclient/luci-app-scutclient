@@ -79,6 +79,6 @@ function action_logs()
 
 
 	local short_dir = "./"..nixio.fs.basename(tar_dir)
-	luci.sys.call("cd /tmp && tar -cvf "..short_dir..".tar "..short_dir)
+	luci.sys.call("cd /tmp && tar -cvf "..short_dir..".tar "..short_dir.." > /dev/null")
 	luci.sys.call("ln -sf "..tar_dir..".tar /www/"..nixio.fs.basename(tar_dir)..".tar")
 end
