@@ -2,6 +2,15 @@
 -- LuCI by libc0607 (libc0607@gmail.com)
 -- 华工路由群：262939451
 
+require("luci.ip")
+local network_status = {}
+network_status.ipaddr = luci.sys.exec("uci get network.wan.ipaddr")
+network_status.netmask = luci.sys.exec("uci get network.wan.netmask")
+network_status.gateway = luci.sys.exec("uci get network.wan.gateway")
+network_status.dns = luci.sys.exec("uci get network.wan.dns")
+network_status.macaddr = luci.sys.exec("uci get network.wan.macaddr")
+
+
 function get_wan_port()
 	-- 啊..应该用uci库的不过没区别
 	return  string.sub(luci.sys.exec("ifstatus wan|grep \\\"device\\\"|awk {'print $2'}"), 2, -4)
@@ -40,11 +49,11 @@ end
 if string.sub(luci.sys.exec("uci get network.wan.proto"), 1, 6) ~= "static" then
 	wanip = "WAN口不是静态地址"
 else
-	wanip = "<p>IP地址/子网掩码/网关："..luci.sys.exec("uci get network.wan.ipaddr").."/"
-	  ..luci.sys.exec("uci get network.wan.netmask").."/"
-	  ..luci.sys.exec("uci get network.wan.gateway").."</p>"
-	  .."<p>DNS:      "..luci.sys.exec("uci get network.wan.dns").."</p>"
-	  .."<p>MAC:      "..luci.sys.exec("uci get network.wan.macaddr").."</p>"
+	wanip = "<p>IP地址 / 子网掩码 / 网关："..network_status.ipaddr.."/ "
+	  ..network_status.netmask.."/ "
+	  ..network_status.gateway.."</p>"
+	  .."<p>DNS:      "..network_status.dns.."</p>"
+	  .."<p>MAC:      "..network_status.macaddr.."</p>"
 end
 
 -- 客户端信息
@@ -56,6 +65,13 @@ client_version = get_client_version("scutclient")
 logoff = luci.dispatcher.build_url("admin/scutclient/status").."?logoff=1"
 scut_status = translate("scutclient ")..get_client_status("scutclient")
 
+
+local network_is_correct = ""
+local netaddr_from_ip = luci.ip.new(network_status.ipaddr, network_status.netmask):network()
+local netaddr_from_gateway = luci.ip.new(network_status.gateway, network_status.netmask):network()
+if netaddr_from_ip ~= netaddr_from_gateway then
+	network_is_correct = "<p><font color=\"red\">IP地址和网关不在同一网段内!!</font></p>" 
+end
 %>
 
 <%+header%>
@@ -66,11 +82,11 @@ scut_status = translate("scutclient ")..get_client_status("scutclient")
 <p><%=ssid%></p>
 <p>WAN口：<%=get_wan_port()%>   <%=wanstatus%></p>
 <%=wanip%>
+<%=network_is_correct%>
 <h3>客户端设置：</h3>
 <a href="<%=logoff%>">下线</a><br />
 <p><%=client_version%></p>
 <p>开机启动：  <%=luci.sys.exec("uci get scutclient.@option[0].enable")%></p>
-<p>拨号接口:   <%=luci.sys.exec("uci get scutclient.@scutclient[0].interface")%></p>
 <p>账号：      <%=luci.sys.exec("uci get scutclient.@scutclient[0].username")%></p>
 <p>密码：      <%=luci.sys.exec("uci get scutclient.@scutclient[0].password")%></p>
 <p>认证模式：  <%=luci.sys.exec("uci get scutclient.@option[0].client")%></p>
