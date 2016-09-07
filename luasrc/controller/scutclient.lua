@@ -27,6 +27,17 @@ function index()
 			translate("日志"),
 			30
 		).leaf = true
+
+		entry({"admin", "scutclient", "about"},
+			call("action_about"),
+			translate("关于"),
+			40
+		).leaf = true
+end
+
+
+function action_about()
+	luci.template.render("scutclient/about")
 end
 
 
