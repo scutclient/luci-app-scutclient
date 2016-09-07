@@ -43,13 +43,12 @@ else
 	ssid ='<td><strong>Wi-Fi 未开启</strong></td>'
 end
 
--- 这里好乱啊但是不想改
 if string.sub(luci.sys.exec("uci get network.wan.proto"), 1, 6) ~= "static" then
 	wanip = '<tr class="cbi-section-table-row cbi-rowstyle-2"><td><strong>WAN口不是静态地址</strong></td></tr>'
 else
-	wanip = '<tr class="cbi-section-table-row cbi-rowstyle-2"><td width="33%"><strong>IP地址</strong></td><td id="status_ipaddr">'..network_status.ipaddr..'</td></tr>'
+	wanip = '<tr class="cbi-section-table-row cbi-rowstyle-2" id="all_status_ipaddr"><td width="33%"><strong>IP地址</strong></td><td id="status_ipaddr">'..network_status.ipaddr..'</td></tr>'
 		  ..'<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>子网掩码</strong></td><td id="status_netmask">'..network_status.netmask..'</td></tr>'
-		  ..'<tr class="cbi-section-table-row cbi-rowstyle-2"><td width="33%"><strong>网关</strong></td><td id="status_gateway">'..network_status.gateway..'</td></tr>'
+		  ..'<tr class="cbi-section-table-row cbi-rowstyle-2" id="all_status_gateway"><td width="33%"><strong>网关</strong></td><td id="status_gateway">'..network_status.gateway..'</td></tr>'
 		  ..'<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>DNS</strong></td><td id="status_dns">'..network_status.dns..'</td></tr>'
 		  ..'<tr class="cbi-section-table-row cbi-rowstyle-2"><td width="33%"><strong>MAC</strong></td><td id="status_macaddr">'..network_status.macaddr..'</td></tr>'
 end
@@ -68,7 +67,7 @@ scut_status = '<td width="33%"><strong>'..translate("scutclient")..'</strong></t
 <%+header%>
 <h2><a id="content" name="content">客户端状态</a></h2>
 <fieldset class="cbi-section">
-<legend>状态</legend>
+<legend><strong>状态</strong></legend>
 <div><table width="100%" cellspacing="10"><tbody>
 <tr class="cbi-section-table-row cbi-rowstyle-1"><%=scut_status%></tr>
 <tr class="cbi-section-table-row cbi-rowstyle-2"><%=ssid%></tr>
@@ -77,7 +76,7 @@ scut_status = '<td width="33%"><strong>'..translate("scutclient")..'</strong></t
 </tbody></table>
 </fieldset>
 <fieldset class="cbi-section">
-<legend>客户端设置</legend>
+<legend><strong>客户端设置</strong></legend>
 <div><table width="100%" cellspacing="10"><tbody>
 <tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>功能</strong></td><td><a href="<%=logoff%>">下线</a></td></tr>
 <tr class="cbi-section-table-row cbi-rowstyle-2"><%=client_version%></tr>
@@ -102,13 +101,13 @@ scut_status = '<td width="33%"><strong>'..translate("scutclient")..'</strong></t
 	if(!isCorrect)
 	{
 		alert("IP地址 和 网关 前三位不一致，请仔细检查！");
-		document.getElementById("status_ipaddr").style.color="red";
-		document.getElementById("status_gateway").style.color="red";
+		document.getElementById("all_status_ipaddr").style.color="red";
+		document.getElementById("all_status_gateway").style.color="red";
 	}
 	else
 	{
-		document.getElementById("status_ipaddr").style.color="black";
-		document.getElementById("status_gateway").style.color="black";
+		document.getElementById("all_status_ipaddr").style.color="black";
+		document.getElementById("all_status_gateway").style.color="black";
 	}
 </script>
 <%+footer%>
