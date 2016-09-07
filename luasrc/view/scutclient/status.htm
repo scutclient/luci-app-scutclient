@@ -34,57 +34,63 @@ function get_client_status(exec_name)
 	end
 end
 
-
-
 -- Wi-Fi
 
 if string.sub(luci.sys.exec("wifi status|grep up|head -n 1|awk {'print $2'}"), 1, 4) == "true" then
-	ssid = "Wi-Fi SSID："..luci.sys.exec("uci get wireless.@wifi-iface[0].ssid")
+	ssid ='<td width="33%"><strong>Wi-Fi SSID ：</strong></td>'
+		..'<td>'..luci.sys.exec("uci get wireless.@wifi-iface[0].ssid")..'</td>'
 else
-	ssid = "Wi-Fi 未开启"
+	ssid ='<td><strong>Wi-Fi 未开启</strong></td>'
 end
 
 -- 这里好乱啊但是不想改
 if string.sub(luci.sys.exec("uci get network.wan.proto"), 1, 6) ~= "static" then
-	wanip = "WAN口不是静态地址"
+	wanip = '<tr class="cbi-section-table-row cbi-rowstyle-2"><td><strong>WAN口不是静态地址</strong></td></tr>'
 else
-	wanip = '<p id="status_ipaddr">IP地址 ：'..network_status.ipaddr..'</p>'
-	  ..'<p id="status_netmask">子网掩码 ：'..network_status.netmask..'</p>'
-	  ..'<p id="status_gateway">网关 ：'..network_status.gateway..'</p>'
-	  ..'<p id="status_dns">DNS :      '..network_status.dns..'</p>'
-	  ..'<p id="status_macaddr">MAC :      '..network_status.macaddr..'</p>'
+	wanip = '<tr class="cbi-section-table-row cbi-rowstyle-2"><td width="33%"><strong>IP地址</strong></td><td id="status_ipaddr">'..network_status.ipaddr..'</td></tr>'
+		  ..'<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>子网掩码</strong></td><td id="status_netmask">'..network_status.netmask..'</td></tr>'
+		  ..'<tr class="cbi-section-table-row cbi-rowstyle-2"><td width="33%"><strong>网关</strong></td><td id="status_gateway">'..network_status.gateway..'</td></tr>'
+		  ..'<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>DNS</strong></td><td id="status_dns">'..network_status.dns..'</td></tr>'
+		  ..'<tr class="cbi-section-table-row cbi-rowstyle-2"><td width="33%"><strong>MAC</strong></td><td id="status_macaddr">'..network_status.macaddr..'</td></tr>'
 end
 
 -- 客户端信息
 client_version = get_client_version("scutclient")
-	and translate("已安装版本：")..get_client_version("scutclient")
-	or translate("scutclient未安装")
+	and '<td width="33%"><strong>'..translate("已安装版本：")..'</strong></td><td>'..get_client_version("scutclient")..'</td>'
+	or '<td><strong>'..translate("scutclient未安装")..'</strong></td>'
 
 -- 重拨/下线
 logoff = luci.dispatcher.build_url("admin/scutclient/status").."?logoff=1"
-scut_status = translate("scutclient ")..get_client_status("scutclient")
+scut_status = '<td width="33%"><strong>'..translate("scutclient")..'</strong></td>'
+			..'<td>'..get_client_status("scutclient")..'</td>'
 %>
 
 <%+header%>
 <h2><a id="content" name="content">客户端状态</a></h2>
-<div class="cbi-map-descr"></div>
-<h3>状态：</h3>
-<p><%=scut_status%></p>
-<p><%=ssid%></p>
-<p>WAN口：<%=get_wan_port()%>   <%=wanstatus%></p>
+<fieldset class="cbi-section">
+<legend>状态</legend>
+<div><table width="100%" cellspacing="10"><tbody>
+<tr class="cbi-section-table-row cbi-rowstyle-1"><%=scut_status%></tr>
+<tr class="cbi-section-table-row cbi-rowstyle-2"><%=ssid%></tr>
+<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%">WAN口</td><td><%=get_wan_port()%></td></tr>
 <%=wanip%>
-<%=network_is_correct%>
-<h3>客户端设置：</h3>
-<a href="<%=logoff%>">下线</a><br />
-<p><%=client_version%></p>
-<p>开机启动：  <%=luci.sys.exec("uci get scutclient.@option[0].enable")%></p>
-<p>账号：      <%=luci.sys.exec("uci get scutclient.@scutclient[0].username")%></p>
-<p>密码：      <%=luci.sys.exec("uci get scutclient.@scutclient[0].password")%></p>
-<p>认证模式：  <%=luci.sys.exec("uci get scutclient.@option[0].client")%></p>
-<p>主机名：    <%=luci.sys.exec("uci get scutclient.@drcom[0].hostname")%></p>
-<p>Drcom版本： <%=luci.sys.exec("uci get scutclient.@drcom[0].version")%></p>
-<p>Hash：      <%=luci.sys.exec("uci get scutclient.@drcom[0].hash")%></p>
-<p>服务器IP：  <%=luci.sys.exec("uci get scutclient.@drcom[0].server_auth_ip")%></p>
+</tbody></table>
+</fieldset>
+<fieldset class="cbi-section">
+<legend>客户端设置</legend>
+<div><table width="100%" cellspacing="10"><tbody>
+<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>功能</strong></td><td><a href="<%=logoff%>">下线</a></td></tr>
+<tr class="cbi-section-table-row cbi-rowstyle-2"><%=client_version%></tr>
+<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>开机启动</strong></td><td><%=luci.sys.exec("uci get scutclient.@option[0].enable")%></td></tr>
+<tr class="cbi-section-table-row cbi-rowstyle-2"><td width="33%"><strong>账号</strong></td><td><%=luci.sys.exec("uci get scutclient.@scutclient[0].username")%></td></tr>
+<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>密码</strong></td><td><%=luci.sys.exec("uci get scutclient.@scutclient[0].password")%></td></tr>
+<tr class="cbi-section-table-row cbi-rowstyle-2"><td width="33%"><strong>认证模式</strong></td><td><%=luci.sys.exec("uci get scutclient.@option[0].client")%></td></tr>
+<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>主机名</strong></td><td><%=luci.sys.exec("uci get scutclient.@drcom[0].hostname")%></td></tr>
+<tr class="cbi-section-table-row cbi-rowstyle-2"><td width="33%"><strong>Drcom版本</strong></td><td><%=luci.sys.exec("uci get scutclient.@drcom[0].version")%></td></tr>
+<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>Hash</strong></td><td><%=luci.sys.exec("uci get scutclient.@drcom[0].hash")%></td></tr>
+<tr class="cbi-section-table-row cbi-rowstyle-2"><td width="33%"><strong>服务器IP</strong></td><td><%=luci.sys.exec("uci get scutclient.@drcom[0].server_auth_ip")%></td></tr>
+</tbody></table>
+</fieldset>
 <script type="text/javascript" language="javascript">
 	var ip = document.getElementById("status_ipaddr").innerHTML;
 	var gateway = document.getElementById("status_gateway").innerHTML;

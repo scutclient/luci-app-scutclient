@@ -1,8 +1,10 @@
 <%+header%>
 <h2><a id="content" name="content">日志</a></h2>
 <div class="cbi-map-descr"></div>
-<h3>配置文件下载</h3>
-<a href="<%="/"..nixio.fs.basename(dirname)..".tar"%>">配置打包下载</a><br />
+<table width="100%" cellspacing="10"><tbody>
+<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>配置文件</strong></td>
+<td><a href="<%="/"..nixio.fs.basename(dirname)..".tar"%>">打包下载</a></td>
+</tbody></table>
 <h3>scutclient日志</h3>
 <div id="content_logs">
 <textarea readonly="readonly" wrap="off" style="width: 100%" rows="20" id="syslog"><%=backuplogs:pcdata()%><%=logs:pcdata()%></textarea>
