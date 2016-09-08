@@ -24,9 +24,6 @@ scut = Map(
 	..'" onclick="javascript:location.href=\''
 	..luci.dispatcher.build_url("admin/system/system")
 	..'\'"/>'
-	..' <div><input style="margin: 2px;" type="button" value="'
-	..translate("点击加入【华工路由器审核群】：262939451")
-	..'" onclick="javascript:location.href=\'http://jq.qq.com/?_wv=1027&k=27KCAyx\'"/>'
 )
 function scut.on_commit(self)
 os.execute("/etc/init.d/scutclient enable")
