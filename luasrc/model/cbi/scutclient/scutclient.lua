@@ -27,7 +27,8 @@ scut = Map(
 )
 function scut.on_commit(self)
 os.execute("/etc/init.d/scutclient enable")
-os.execute("/etc/init.d/scutclient restart > /dev/null")
+os.execute("killall scutclient > /dev/null")
+os.execute("/etc/init.d/scutclient start > /dev/null")
 end
 
 -- config option
