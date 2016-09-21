@@ -46,6 +46,10 @@ function action_status()
 	if luci.http.formvalue("logoff") == "1" then
 		luci.sys.call("/etc/init.d/scutclient stop > /dev/null")
 	end
+	if luci.http.formvalue("redial") == "1" then
+		luci.sys.call("/etc/init.d/scutclient stop > /dev/null")
+		luci.sys.call("/etc/init.d/scutclient start > /dev/null")
+	end
 end
 
 

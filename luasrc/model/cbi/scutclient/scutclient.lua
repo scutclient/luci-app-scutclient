@@ -1,6 +1,5 @@
 -- LuCI by libc0607 (libc0607@gmail.com)
 -- 华工路由群 262939451
-
 scut = Map(
 	"scutclient",
 	translate("华南理工大学客户端 设置"),
@@ -27,7 +26,7 @@ scut = Map(
 )
 function scut.on_commit(self)
 os.execute("/etc/init.d/scutclient enable")
-os.execute("killall scutclient > /dev/null")
+os.execute("/etc/init.d/scutclient stop > /dev/null")
 os.execute("/etc/init.d/scutclient start > /dev/null")
 end
 
@@ -42,11 +41,6 @@ scut_option_enable.rmempty = false
 scut_option_plugin_redial = scut_option:option(Flag, "plugin_redial", translate("启用插线自动重拨"))
 scut_option_plugin_redial.addremove = false
 scut_option_plugin_redial.rmempty = false
-
-
-scut_option_debug = scut_option:option(Flag, "debug", translate("打开调试日志"))
-scut_option_debug.addremove = false
-scut_option_debug.rmempty = false
 
 scut_option_mode = scut_option:option(ListValue, "mode", translate("客户端选择"))
 scut_option_mode.rmempty = false

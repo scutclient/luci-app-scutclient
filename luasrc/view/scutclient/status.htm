@@ -60,6 +60,7 @@ client_version = get_client_version("scutclient")
 
 -- 重拨/下线
 logoff = luci.dispatcher.build_url("admin/scutclient/status").."?logoff=1"
+redial = luci.dispatcher.build_url("admin/scutclient/status").."?redial=1"
 scut_status = '<td width="33%"><strong>'..translate("scutclient")..'</strong></td>'
 			..'<td style="color: red;">'..get_client_status("scutclient")..'</td>'
 %>
@@ -78,7 +79,7 @@ scut_status = '<td width="33%"><strong>'..translate("scutclient")..'</strong></t
 <fieldset class="cbi-section">
 <legend><strong>客户端设置</strong></legend>
 <div><table width="100%" cellspacing="10"><tbody>
-<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>功能</strong></td><td><a href="<%=logoff%>">下线</a></td></tr>
+<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>功能</strong></td><td><a href="<%=logoff%>">下线</a>    <a href="<%=redial%>">重拨</a></td></tr>
 <tr class="cbi-section-table-row cbi-rowstyle-2"><%=client_version%></tr>
 <tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>开机启动</strong></td><td><%=luci.sys.exec("uci get scutclient.@option[0].enable")%></td></tr>
 <tr class="cbi-section-table-row cbi-rowstyle-2"><td width="33%"><strong>账号</strong></td><td><%=luci.sys.exec("uci get scutclient.@scutclient[0].username")%></td></tr>
