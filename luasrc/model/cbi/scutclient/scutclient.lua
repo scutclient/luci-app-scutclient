@@ -34,7 +34,7 @@ end
 scut_option = scut:section(TypedSection, "option", translate("选项"))
 scut_option.anonymous = true
 
-scut_option_enable = scut_option:option(Flag, "enable", translate("启用"))
+scut_option_enable = scut_option:option(Flag, "enable", translate("开机自动启动"))
 scut_option_enable.addremove = false
 scut_option_enable.rmempty = false
 
