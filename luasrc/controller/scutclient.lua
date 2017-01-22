@@ -7,7 +7,7 @@ function index()
 		entry({"admin", "scutclient"},
 			alias("admin", "scutclient", "settings"),
 			translate("华南理工大学客户端"),
-			10
+			10  --tagforsed
 		)
 
 		entry({"admin", "scutclient", "settings"},
@@ -49,6 +49,10 @@ function action_status()
 	if luci.http.formvalue("redial") == "1" then
 		luci.sys.call("/etc/init.d/scutclient stop > /dev/null")
 		luci.sys.call("/etc/init.d/scutclient start > /dev/null")
+	end
+	if luci.http.formvalue("move_tag") == "1" then
+		luci.sys.call("sed -i 's/10 *--tagforsed/90    -- change it to 10 to move it back/' /usr/lib/lua/luci/controller/scutclient.lua")
+		luci.sys.call("rm -rf /tmp/luci-*")
 	end
 end
 
