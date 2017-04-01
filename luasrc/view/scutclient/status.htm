@@ -36,12 +36,18 @@ end
 
 -- Wi-Fi
 
-if string.sub(luci.sys.exec("wifi status|grep up|head -n 1|awk {'print $2'}"), 1, 4) == "true" then
+local wifi_status_up = string.sub(luci.sys.exec("wifi status|grep up|head -n 1|awk {'print $2'}"), 1, 4)
+
+if wifi_status_up == "true" then
 	ssid ='<td width="33%"><strong>Wi-Fi SSID ：</strong></td>'
 		..'<td>'..luci.sys.exec("uci get wireless.@wifi-iface[0].ssid")..'</td>'
-else
+end
+
+if wifi_status_up == "fals" then
 	ssid ='<td style="color: red;"><strong>Wi-Fi 未开启</strong></td>'
 end
+
+
 
 if string.sub(luci.sys.exec("uci get network.wan.proto"), 1, 6) ~= "static" then
 	wanip = '<tr class="cbi-section-table-row cbi-rowstyle-2"><td style="color: red;"><strong id="wan_status">WAN口不是静态地址</strong></td></tr>'
