@@ -1,5 +1,14 @@
 module("luci.controller.scutclient", package.seeall)
 
+local uci  = require "luci.model.uci".cursor()
+local http = require "luci.http"
+local fs = require "nixio.fs"
+local sys  = require "luci.sys"
+
+local log_file = "/tmp/scutclient.log"
+local log_file_backup = "/tmp/scutclient.log.backup.log"
+
+
 function index()
 	if not nixio.fs.access("/etc/config/scutclient") then
 		return
@@ -33,6 +42,24 @@ function index()
 			translate("关于"),
 			40
 		).leaf = true
+
+		-- 实时刷日志
+		entry({"admin", "scutclient", "get_log"},
+			call("get_log")
+		)
+end
+
+
+function get_log()
+	local client_log = {}
+	if fs.access(log_file) then 
+		client_log.log = sys.exec("tail -n 20 " .. log_file)
+	else
+		client_log.log = "+1s" 	
+	end
+
+	http.prepare_content("application/json")
+	http.write_json(client_log)
 end
 
 
@@ -58,10 +85,10 @@ end
 
 
 function action_logs()
-	luci.sys.call("touch /tmp/scutclient.log")
-	luci.sys.call("touch /tmp/scutclient.log.backup.log")
-	local logfile = string.sub(luci.sys.exec("ls /tmp/scutclient.log"),1, -2) or ""
-	local backuplogfile = string.sub(luci.sys.exec("ls /tmp/scutclient.log.backup.log"),1, -2) or ""
+	luci.sys.call("touch " .. log_file)
+	luci.sys.call("touch " .. log_file_backup)
+	local logfile = string.sub(luci.sys.exec("ls " .. log_file),1, -2) or ""
+	local backuplogfile = string.sub(luci.sys.exec("ls " .. log_file_backup),1, -2) or ""
 	local logs = nixio.fs.readfile(logfile) or ""
 	local backuplogs = nixio.fs.readfile(backuplogfile) or ""
 	local dirname = "/tmp/scutclient-log-"..os.date("%Y%m%d-%H%M%S")

@@ -1,15 +1,45 @@
 <%+header%>
-<h2><a id="content" name="content">客户端日志</a></h2>
-<div class="cbi-map-descr"></div>
-<table width="100%" cellspacing="10"><tbody>
-<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>配置文件</strong></td>
-<td><a href="<%="/"..nixio.fs.basename(dirname)..".tar"%>">打包下载</a></td>
-</tbody></table>
-<h3>scutclient日志</h3>
-<div id="content_logs">
-<textarea readonly="readonly" wrap="off" style="width: 100%" rows="20" id="syslog"><%=backuplogs:pcdata()%><%=logs:pcdata()%></textarea>
+
+<h2>
+	<a id="content" name="content">客户端日志</a>
+</h2>
+
+<div class="cbi-map-descr">
 </div>
+
+<table width="100%" cellspacing="10">
+	<tbody>
+		<tr class="cbi-section-table-row cbi-rowstyle-1">
+			<td width="33%"><strong>配置文件</strong></td>
+			<td><a href="<%="/"..nixio.fs.basename(dirname)..".tar"%>">打包下载</a></td>
+	</tbody>
+</table>
+
+<h3>
+	scutclient日志
+</h3>
+
+<div id="content_logs">
+	<textarea readonly="readonly" wrap="off" style="width: 100%" rows="21" id="syslog">
+		<%=logs:pcdata()%>
+	</textarea>
+</div>
+
 <script type="text/javascript" language="javascript">
 	document.getElementById("syslog").scrollTop=document.getElementById("syslog").scrollHeight;
+	XHR.poll(2, '<%=luci.dispatcher.build_url('admin/scutclient/get_log')%>', null,
+        function(x, log_json) {
+			var syslog_id = document.getElementById("syslog");
+			if (typeof(log_json.log) != "undefined") {
+				if (log_json.log == "+1s") {
+					syslog_id.innerHTML = "读取日志出错！你的时间又减少了1s，请刷新重试";
+				} else {
+					syslog_id.innerHTML = log_json.log;
+				}
+			}
+		}
+	);
 </script>
+
 <%+footer%>
+
