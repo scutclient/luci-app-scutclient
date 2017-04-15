@@ -23,11 +23,16 @@ scut = Map(
 	..'" onclick="javascript:location.href=\''
 	..luci.dispatcher.build_url("admin/system/system")
 	..'\'"/>'
+	..' <input style="margin: 2px;" class="cbi-button cbi-button-apply" type="button" value="'
+	..translate("Step 5 : 点此处去修改路由器管理密码")
+	..'" onclick="javascript:location.href=\''
+	..luci.dispatcher.build_url("admin/system/admin")
+	..'\'"/>'
 )
 function scut.on_commit(self)
-os.execute("/etc/init.d/scutclient enable")
-os.execute("/etc/init.d/scutclient stop > /dev/null")
-os.execute("/etc/init.d/scutclient start > /dev/null")
+	os.execute("/etc/init.d/scutclient enable")
+	os.execute("/etc/init.d/scutclient stop > /dev/null")
+	os.execute("/etc/init.d/scutclient start > /dev/null")
 end
 
 -- config option

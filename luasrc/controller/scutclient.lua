@@ -51,11 +51,12 @@ end
 
 
 function get_log()
+	local send_log_lines = 60
 	local client_log = {}
-	if fs.access(log_file) then 
-		client_log.log = sys.exec("tail -n 20 " .. log_file)
+	if fs.access(log_file) then
+		client_log.log = sys.exec("tail -n "..send_log_lines.." " .. log_file)
 	else
-		client_log.log = "+1s" 	
+		client_log.log = "+1s"
 	end
 
 	http.prepare_content("application/json")
@@ -117,7 +118,7 @@ function action_logs()
 	luci.sys.call("rm -rf /tmp/scutclient-log-*")
 	luci.sys.call("rm /www/scutclient-log-*")
 
-	local tar_dir = dirname		
+	local tar_dir = dirname
 	nixio.fs.mkdirr(tar_dir)
 	table.foreach(tar_files, function(i, v)
 			luci.sys.call("cp "..v.." "..tar_dir)

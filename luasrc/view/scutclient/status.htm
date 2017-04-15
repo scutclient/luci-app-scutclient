@@ -2,108 +2,226 @@
 -- LuCI by libc0607 (libc0607@gmail.com)
 -- 华工路由群：262939451
 
-local network_status = {}
-network_status.ipaddr = luci.sys.exec("uci get network.wan.ipaddr")
-network_status.netmask = luci.sys.exec("uci get network.wan.netmask")
-network_status.gateway = luci.sys.exec("uci get network.wan.gateway")
-network_status.dns = luci.sys.exec("uci get network.wan.dns")
-network_status.macaddr = luci.sys.exec("uci get network.wan.macaddr")
+local sys  = require "luci.sys"
+local fs = require "nixio.fs"
+local uci = require "luci.model.uci".cursor()
+local ipkg = require "luci.model.ipkg"
 
+local network_status = {}
+network_status.ipaddr = uci:get("network", "wan", "ipaddr")
+network_status.netmask = uci:get("network", "wan", "netmask")
+network_status.gateway = uci:get("network", "wan", "gateway")
+network_status.dns = uci:get("network", "wan", "dns")
+network_status.macaddr = uci:get("network", "wan", "macaddr")
+
+local scutclient_status = {}
+scutclient_status.enable = uci:get_first("scutclient", "option", "enable")
+scutclient_status.client = uci:get_first("scutclient", "option", "client")
+scutclient_status.username = uci:get_first("scutclient", "scutclient", "username")
+scutclient_status.password = uci:get_first("scutclient", "scutclient", "password")
+scutclient_status.hostname = uci:get_first("scutclient", "drcom", "hostname")
+scutclient_status.version = uci:get_first("scutclient", "drcom", "version")
+scutclient_status.hash = uci:get_first("scutclient", "drcom", "hash")
+scutclient_status.server_auth_ip = uci:get_first("scutclient", "drcom", "server_auth_ip")
+local mode_links = {}
+mode_links.base = luci.dispatcher.build_url("admin/scutclient/status")
+mode_links.redial = mode_links.base.."?redial=1"
+mode_links.logoff = mode_links.base.."?logoff=1"
+mode_links.move_tag = mode_links.base .."?move_tag=1"
+
+function page_has_moved()
+	return string.find(luci.sys.exec("cat /usr/lib/lua/luci/controller/scutclient.lua|grep -o tagforsed|grep -c tagforsed"), "2")
+		and false
+		or true
+end
 
 function get_wan_port()
-	-- 啊..应该用uci库的不过没区别
 	return  string.sub(luci.sys.exec("ifstatus wan|grep \\\"device\\\"|awk {'print $2'}"), 2, -4)
 end
 
- 
 function get_client_version(pkg_name)
-	-- 这个可能不准确 openwrt bb/cc上没问题
 	return string.find(luci.sys.exec("opkg list-installed"), pkg_name)
 		and luci.sys.exec("opkg list-installed|grep "..pkg_name.."|grep -v luci|awk '{print $3}'")
 		or  nil
 end
 
-
 function get_client_status(exec_name)
-	local s = nil
-	s = string.find(luci.sys.exec("ps|grep scutclient|grep -v grep"), "scutclient")
-	if s == nil then
-		return translate("没有运行")
-	else
-		return translate("正在运行") 
-	end
+	return (string.find(luci.sys.exec("ps|grep scutclient|grep -v grep"), "scutclient"))
+		and true
+		or false
 end
 
--- Wi-Fi
-
-local wifi_status_up = string.sub(luci.sys.exec("wifi status|grep up|head -n 1|awk {'print $2'}"), 1, 4)
-
-if wifi_status_up == "true" then
-	ssid ='<td width="33%"><strong>Wi-Fi SSID ：</strong></td>'
-		..'<td>'..luci.sys.exec("uci get wireless.@wifi-iface[0].ssid")..'</td>'
+function get_wifi_switch()
+	return (string.sub(luci.sys.exec("wifi status|grep up|head -n 1|awk {'print $2'}"), 1, 4) == "true")
+		and true
+		or false
 end
 
-if wifi_status_up == "fals" then
-	ssid ='<td style="color: red;"><strong>Wi-Fi 未开启</strong></td>'
-end
-
-
-
-if string.sub(luci.sys.exec("uci get network.wan.proto"), 1, 6) ~= "static" then
-	wanip = '<tr class="cbi-section-table-row cbi-rowstyle-2"><td style="color: red;"><strong id="wan_status">WAN口不是静态地址</strong></td></tr>'
-else
-	wanip = '<tr class="cbi-section-table-row cbi-rowstyle-2" id="all_status_ipaddr"><td width="33%"><strong>IP地址</strong></td><td id="status_ipaddr">'..network_status.ipaddr..'</td></tr>'
-		  ..'<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>子网掩码</strong></td><td id="status_netmask">'..network_status.netmask..'</td></tr>'
-		  ..'<tr class="cbi-section-table-row cbi-rowstyle-2" id="all_status_gateway"><td width="33%"><strong>网关</strong></td><td id="status_gateway">'..network_status.gateway..'</td></tr>'
-		  ..'<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>DNS</strong></td><td id="status_dns">'..network_status.dns..'</td></tr>'
-		  ..'<tr class="cbi-section-table-row cbi-rowstyle-2"><td width="33%"><strong>MAC</strong></td><td id="status_macaddr">'..network_status.macaddr..'</td></tr>'
-end
-
--- 客户端信息
-local client_version = get_client_version("scutclient")
-	and '<td width="33%"><strong>'..translate("已安装版本：")..'</strong></td><td>'..get_client_version("scutclient")..'</td>'
-	or '<td style="color: red;"><strong>'..translate("scutclient未安装")..'</strong></td>'
-
--- 重拨/下线
-local logoff = luci.dispatcher.build_url("admin/scutclient/status").."?logoff=1"
-local redial = luci.dispatcher.build_url("admin/scutclient/status").."?redial=1"
-local scut_status = '<td width="33%"><strong>'..translate("scutclient")..'</strong></td>'
-			..'<td style="color: red;">'..get_client_status("scutclient")..'</td>'
-
-local move_tag = luci.dispatcher.build_url("admin/scutclient/status").."?move_tag=1"
-local moveitaway = nil
-if string.find(luci.sys.exec("cat /usr/lib/lua/luci/controller/scutclient.lua | grep -o tagforsed | grep -c tagforsed"), "2") then
-  moveitaway = "<a href=\""..move_tag.."\">我不想每次打开都见到这个界面把它移走（点完记得刷新"
+function wan_is_static()
+	return (uci:get_first("network", "wan", "proto") == "static")
+		and true
+		or false
 end
 
 %>
 
+
 <%+header%>
-<h2><a id="content" name="content">客户端状态</a></h2>
+
+<h2>
+	<a id="content" name="content">客户端状态</a>
+</h2>
 <fieldset class="cbi-section">
-<legend><strong>状态</strong></legend>
-<div><table width="100%" cellspacing="10"><tbody>
-<tr class="cbi-section-table-row cbi-rowstyle-1"><%=scut_status%></tr>
-<tr class="cbi-section-table-row cbi-rowstyle-2"><%=ssid%></tr>
-<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%">WAN口</td><td><%=get_wan_port()%></td></tr>
-<%=wanip%>
-</tbody></table>
+<legend>
+	<strong>状态</strong>
+</legend>
+
+<div>
+	<table width="100%" cellspacing="10">
+		<tbody>
+
+			<tr class="cbi-section-table-row cbi-rowstyle-1">
+				<td width="33%"><strong>scutclient</strong></td>
+				<% if get_client_status("scutclient") then %>
+				<td style="color: red;">正在运行</td>
+				<% else %>
+				<td style="color: red;">没有运行</td>
+				<% end %>
+			</tr>
+
+			<tr class="cbi-section-table-row cbi-rowstyle-2">
+				<% if get_wifi_switch() then -%>
+				<td width="33%"><strong>Wi-Fi SSID ：</strong></td>
+				<td><%=luci.sys.exec("uci get wireless.@wifi-iface[0].ssid")%></td>
+				<% else %>
+				<td style="color: red;"><strong>Wi-Fi 状态:</strong></td>
+				<td style="color: red;"><strong>未开启，或路由器没有无线网卡</strong></td>
+				<% end %>
+			</tr>
+
+			<tr class="cbi-section-table-row cbi-rowstyle-1">
+				<td width="33%">WAN口</td>
+				<td><%=get_wan_port()%></td>
+			</tr>
+
+			<% if wan_is_static() then %>
+			<tr class="cbi-section-table-row cbi-rowstyle-2">
+				<td style="color: red;"><strong id="wan_status">WAN口不是静态地址</strong></td>
+			</tr>
+			<% else %>
+			<tr class="cbi-section-table-row cbi-rowstyle-2" id="all_status_ipaddr">
+				<td width="33%"><strong>IP地址</strong></td>
+				<td id="status_ipaddr"><%=network_status.ipaddr%></td>
+			</tr>
+
+			<tr class="cbi-section-table-row cbi-rowstyle-1">
+				<td width="33%"><strong>子网掩码</strong></td>
+				<td id="status_netmask"><%=network_status.netmask%></td>
+			</tr>
+
+			<tr class="cbi-section-table-row cbi-rowstyle-2" id="all_status_gateway">
+				<td width="33%"><strong>网关</strong></td>
+				<td id="status_gateway"><%=network_status.gateway%></td>
+			</tr>
+
+			<tr class="cbi-section-table-row cbi-rowstyle-1">
+				<td width="33%"><strong>DNS</strong></td>
+				<td id="status_dns"><%=network_status.dns%></td>
+			</tr>
+
+			<tr class="cbi-section-table-row cbi-rowstyle-2">
+				<td width="33%"><strong>MAC</strong></td>
+				<td id="status_macaddr"><%=network_status.macaddr%></td>
+			</tr>
+			<% end %>
+
+		</tbody>
+	</table>
 </fieldset>
+
+
+
+
 <fieldset class="cbi-section">
-<legend><strong>客户端设置</strong></legend>
-<div><table width="100%" cellspacing="10"><tbody>
-<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>功能</strong></td><td><a href="<%=logoff%>">下线</a>    <a href="<%=redial%>">重拨</a>   <%=moveitaway%>   </td></tr>
-<tr class="cbi-section-table-row cbi-rowstyle-2"><%=client_version%></tr>
-<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>开机启动</strong></td><td><%=luci.sys.exec("uci get scutclient.@option[0].enable")%></td></tr>
-<tr class="cbi-section-table-row cbi-rowstyle-2"><td width="33%"><strong>账号</strong></td><td><%=luci.sys.exec("uci get scutclient.@scutclient[0].username")%></td></tr>
-<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>密码</strong></td><td><%=luci.sys.exec("uci get scutclient.@scutclient[0].password")%></td></tr>
-<tr class="cbi-section-table-row cbi-rowstyle-2"><td width="33%"><strong>认证模式</strong></td><td><%=luci.sys.exec("uci get scutclient.@option[0].client")%></td></tr>
-<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>主机名</strong></td><td><%=luci.sys.exec("uci get scutclient.@drcom[0].hostname")%></td></tr>
-<tr class="cbi-section-table-row cbi-rowstyle-2"><td width="33%"><strong>Drcom版本</strong></td><td><%=luci.sys.exec("uci get scutclient.@drcom[0].version")%></td></tr>
-<tr class="cbi-section-table-row cbi-rowstyle-1"><td width="33%"><strong>Hash</strong></td><td><%=luci.sys.exec("uci get scutclient.@drcom[0].hash")%></td></tr>
-<tr class="cbi-section-table-row cbi-rowstyle-2"><td width="33%"><strong>服务器IP</strong></td><td><%=luci.sys.exec("uci get scutclient.@drcom[0].server_auth_ip")%></td></tr>
-</tbody></table>
+<legend>
+	<strong>客户端设置</strong>
+</legend>
+
+<div>
+	<table width="100%" cellspacing="10">
+		<tbody>
+
+			<tr class="cbi-section-table-row cbi-rowstyle-1">
+				<td width="33%"><strong>功能</strong></td>
+				<td>
+					<a href="<%=mode_links.logoff%>">下线</a>
+					<a href="<%=mode_links.redial%>">重拨</a>
+					<% if page_has_moved() then %>
+					<a href="<%=mode_links.move_tag%>">我不想每次打开都见到这个界面把它移走</a>
+					<% end %>
+				</td>
+			</tr>
+
+			<tr class="cbi-section-table-row cbi-rowstyle-2">
+				<% if get_client_version("scutclient") then %>
+				<td width="33%"><strong>已安装版本：</strong></td>
+				<td><%=get_client_version("scutclient")%></td>
+				<% else %>
+				<td style="color: red;"><strong>scutclient未安装</strong></td>
+				<% end %>
+			</tr>
+
+			<tr class="cbi-section-table-row cbi-rowstyle-1">
+				<td width="33%"><strong>开机启动</strong></td>
+				<td><%=scutclient_status.enable%></td>
+			</tr>
+
+			<tr class="cbi-section-table-row cbi-rowstyle-2">
+				<td width="33%"><strong>账号</strong></td>
+				<% if scutclient_status.username == "root" then %>
+				<td style="color: red;"><%=scutclient_status.username%>。。。你的浏览器开启了自动保存帐号密码？</td>
+				<% else %>
+				<td><%=scutclient_status.username%></td>
+				<% end %>
+			</tr>
+
+			<tr class="cbi-section-table-row cbi-rowstyle-1">
+				<td width="33%"><strong>密码</strong></td>
+				<td><%=scutclient_status.password%></td>
+			</tr>
+
+			<tr class="cbi-section-table-row cbi-rowstyle-2">
+				<td width="33%"><strong>认证模式</strong></td>
+				<td><%=scutclient_status.client%></td>
+			</tr>
+
+			<tr class="cbi-section-table-row cbi-rowstyle-1">
+				<td width="33%"><strong>主机名</strong></td>
+				<td><%=scutclient_status.hostname%></td>
+			</tr>
+
+			<tr class="cbi-section-table-row cbi-rowstyle-2">
+				<td width="33%"><strong>Drcom版本</strong></td>
+				<td><%=scutclient_status.version%></td>
+			</tr>
+
+			<tr class="cbi-section-table-row cbi-rowstyle-1">
+				<td width="33%"><strong>Hash</strong></td>
+				<td><%=scutclient_status.hash%></td>
+			</tr>
+
+			<tr class="cbi-section-table-row cbi-rowstyle-2">
+				<td width="33%"><strong>服务器IP</strong></td>
+				<td><%=scutclient_status.server_auth_ip%></td>
+			</tr>
+
+		</tbody>
+	</table>
 </fieldset>
+
+
+
+
 <script type="text/javascript" language="javascript">
 	window.alert = function(txt){
 			 var shield = document.createElement("DIV");
@@ -154,7 +272,6 @@ end
 		}
 		if(!isCorrect)
 		{
-			
 			alert( ip + "<br/>"+ gateway +"<br/>前三位不一致，请看教程三遍！");
 			document.getElementById("all_status_ipaddr").style.color="red";
 			document.getElementById("all_status_gateway").style.color="red";
@@ -165,5 +282,7 @@ end
 			document.getElementById("all_status_gateway").style.color="black";
 		}
 	}
+
+
 </script>
 <%+footer%>
