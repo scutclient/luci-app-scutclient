@@ -13,38 +13,38 @@ function index()
 	if not nixio.fs.access("/etc/config/scutclient") then
 		return
 	end
-		entry({"admin", "scutclient"},
-			alias("admin", "scutclient", "settings"),
+		entry({"admin", "network", "scutclient"},
+			alias("admin", "network", "scutclient", "settings"),
 			translate("华南理工大学客户端"),
-			10  --tagforsed
+			99
 		)
 
-		entry({"admin", "scutclient", "settings"},
+		entry({"admin", "network", "scutclient", "settings"},
 			cbi("scutclient/scutclient"),
 			translate("设置"),
 			10
 		).leaf = true
 
-		entry({"admin", "scutclient", "status"},
+		entry({"admin", "network", "scutclient", "status"},
 			call("action_status"),
 			translate("状态"),
 			20
 		).leaf = true
 
-		entry({"admin", "scutclient", "logs"},
+		entry({"admin", "network", "scutclient", "logs"},
 			call("action_logs"),
 			translate("日志"),
 			30
 		).leaf = true
 
-		entry({"admin", "scutclient", "about"},
+		entry({"admin", "network", "scutclient", "about"},
 			call("action_about"),
 			translate("关于"),
 			40
 		).leaf = true
 
 		-- 实时刷日志
-		entry({"admin", "scutclient", "get_log"},
+		entry({"admin", "network", "scutclient", "get_log"},
 			call("get_log")
 		)
 end
