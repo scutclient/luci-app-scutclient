@@ -122,9 +122,9 @@ scut_drcom_hostname.default = random_hostname
 scut_drcom_delay = scut_drcom:option(Value, "delay", translate("开机延时（秒）后拨号"))
 scut_drcom_delay.rmempty = false
 scut_drcom_delay.datatype  = "integer"
+scut_drcom_delay:value("2")
+scut_drcom_delay:value("10")
 scut_drcom_delay:value("30")
-scut_drcom_delay:value("60")
-scut_drcom_delay:value("99")
-scut_drcom_delay.default="30"
+scut_drcom_delay.default="2"
 
 return scut
