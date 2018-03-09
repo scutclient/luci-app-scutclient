@@ -19,26 +19,15 @@
 	scutclient日志
 </h3>
 
-<div id="content_logs">
-	<textarea readonly="readonly" wrap="off" style="width: 100%" rows="20" id="syslog">
-		<%=logs:pcdata()%>
-	</textarea>
+<div id="syslog">
+	<iframe src="<%=luci.dispatcher.build_url('admin/scutclient/get_log')%>" width="100%" frameborder="0" scrolling="no" onload="resizeIframe(this)">
+	</iframe>
 </div>
 
 <script type="text/javascript" language="javascript">
-	document.getElementById("syslog").scrollTop=document.getElementById("syslog").scrollHeight;
-	XHR.poll(2, '<%=luci.dispatcher.build_url('admin/scutclient/get_log')%>', null,
-        function(x, log_json) {
-			var syslog_id = document.getElementById("syslog");
-			if (typeof(log_json.log) != "undefined") {
-				if (log_json.log == "+1s") {
-					syslog_id.innerHTML = "读取日志出错！你的时间又减少了1s，请刷新重试";
-				} else {
-					syslog_id.innerHTML = log_json.log;
-				}
-			}
-		}
-	);
+function resizeIframe(obj) {
+  obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
+}
 </script>
 
 <%+footer%>

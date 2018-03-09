@@ -51,16 +51,17 @@ end
 
 
 function get_log()
-	local send_log_lines = 60
-	local client_log = {}
+	local send_log_lines = 75
 	if fs.access(log_file) then
-		client_log.log = sys.exec("tail -n "..send_log_lines.." " .. log_file)
+		client_log = sys.exec("tail -n "..send_log_lines.." " .. log_file)
 	else
-		client_log.log = "+1s"
+		client_log = "Unable to access the log file!"
 	end
 
-	http.prepare_content("application/json")
-	http.write_json(client_log)
+	http.prepare_content("text/plain; charset=gbk")
+	http.header("Refresh", "3")
+	http.write(client_log)
+	http.close()
 end
 
 
@@ -90,12 +91,8 @@ function action_logs()
 	luci.sys.call("touch " .. log_file_backup)
 	local logfile = string.sub(luci.sys.exec("ls " .. log_file),1, -2) or ""
 	local backuplogfile = string.sub(luci.sys.exec("ls " .. log_file_backup),1, -2) or ""
-	local logs = nixio.fs.readfile(logfile) or ""
-	local backuplogs = nixio.fs.readfile(backuplogfile) or ""
 	local dirname = "/tmp/scutclient-log-"..os.date("%Y%m%d-%H%M%S")
 	luci.template.render("scutclient/logs", {
-		logs=logs,
-		backuplogs=backuplogs,
 		dirname=dirname,
 		logfile=logfile
 	})
