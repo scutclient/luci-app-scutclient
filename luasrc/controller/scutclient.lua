@@ -59,7 +59,6 @@ function get_log()
 	end
 
 	http.prepare_content("text/plain; charset=gbk")
-	http.header("Refresh", "3")
 	http.write(client_log)
 	http.close()
 end
