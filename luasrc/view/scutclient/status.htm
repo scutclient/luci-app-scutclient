@@ -40,9 +40,12 @@ function get_wan_port()
 end
 
 function get_client_version(pkg_name)
-	return string.find(luci.sys.exec("opkg list-installed"), pkg_name)
-		and luci.sys.exec("opkg list-installed|grep "..pkg_name.."|grep -v luci|awk '{print $3}'")
-		or  nil
+	local clistat = ipkg.info('scutclient')
+	if clistat['scutclient'] then
+		return clistat['scutclient']['Version']
+	else
+		return nil
+	end
 end
 
 function get_client_status(exec_name)
