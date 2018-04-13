@@ -1,16 +1,16 @@
 module("luci.controller.scutclient", package.seeall)
 
-local uci  = require "luci.model.uci".cursor()
-local http = require "luci.http"
-local fs = require "nixio.fs"
-local sys  = require "luci.sys"
+uci  = require "luci.model.uci".cursor()
+http = require "luci.http"
+fs = require "nixio.fs"
+sys  = require "luci.sys"
 
-local log_file = "/tmp/scutclient.log"
-local log_file_backup = "/tmp/scutclient.log.backup.log"
+log_file = "/tmp/scutclient.log"
+log_file_backup = "/tmp/scutclient.log.backup.log"
 
 
 function index()
-	if not nixio.fs.access("/etc/config/scutclient") then
+	if not fs.access("/etc/config/scutclient") then
 		return
 	end
 		entry({"admin", "scutclient"},
@@ -32,7 +32,7 @@ function index()
 		).leaf = true
 
 		entry({"admin", "scutclient", "logs"},
-			call("action_logs"),
+			template("scutclient/logs"),
 			translate("日志"),
 			30
 		).leaf = true
@@ -46,6 +46,10 @@ function index()
 		-- 实时刷日志
 		entry({"admin", "scutclient", "get_log"},
 			call("get_log")
+		)
+
+		entry({"admin", "scutclient", "scutclient-log.tar"},
+			call("get_dbgtar")
 		)
 end
 
@@ -85,17 +89,9 @@ function action_status()
 end
 
 
-function action_logs()
-	luci.sys.call("touch " .. log_file)
-	luci.sys.call("touch " .. log_file_backup)
-	local logfile = string.sub(luci.sys.exec("ls " .. log_file),1, -2) or ""
-	local backuplogfile = string.sub(luci.sys.exec("ls " .. log_file_backup),1, -2) or ""
-	local dirname = "/tmp/scutclient-log-"..os.date("%Y%m%d-%H%M%S")
-	luci.template.render("scutclient/logs", {
-		dirname=dirname,
-		logfile=logfile
-	})
+function get_dbgtar()
 
+	local tar_dir = "/tmp/scutclient-log"
 	local tar_files = {
 		"/etc/config/wireless",
 		"/etc/config/network",
@@ -106,22 +102,21 @@ function action_logs()
 		"/etc/config/dhcp",
 		"/tmp/dhcp.leases",
 		"/etc/rc.local",
-		logfile,
-		backuplogfile
 	}
 
-	luci.sys.call("rm /tmp/scutclient-log-*.tar")
-	luci.sys.call("rm -rf /tmp/scutclient-log-*")
-	luci.sys.call("rm /www/scutclient-log-*")
-
-	local tar_dir = dirname
-	nixio.fs.mkdirr(tar_dir)
+	fs.mkdirr(tar_dir)
 	table.foreach(tar_files, function(i, v)
-			luci.sys.call("cp "..v.." "..tar_dir)
+			luci.sys.call("cp " .. v .. " " .. tar_dir)
 	end)
 
-
-	local short_dir = "./"..nixio.fs.basename(tar_dir)
-	luci.sys.call("cd /tmp && tar -cvf "..short_dir..".tar "..short_dir.." > /dev/null")
-	luci.sys.call("ln -sf "..tar_dir..".tar /www/"..nixio.fs.basename(tar_dir)..".tar")
+	if fs.access(log_file_backup) then
+		luci.sys.call("cat " .. log_file_backup .. " >> " .. tar_dir .. "/scutclient.log")
+	end
+	if fs.access(log_file) then
+		luci.sys.call("cat " .. log_file .. " >> " .. tar_dir .. "/scutclient.log")
+	end
+	http.prepare_content("application/octet-stream")
+	http.write(sys.exec("tar -C " .. tar_dir .. " -cf - ."))
+	luci.sys.call("rm -rf " .. tar_dir)
+	http.close()
 end

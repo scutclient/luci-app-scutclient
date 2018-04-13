@@ -11,7 +11,7 @@
 	<tbody>
 		<tr class="cbi-section-table-row cbi-rowstyle-1">
 			<td width="33%"><strong>配置文件</strong></td>
-			<td><a href="<%="/"..nixio.fs.basename(dirname)..".tar"%>">打包下载</a></td>
+			<td><input style="margin: 2px;" class="cbi-button cbi-button-apply" type="button" value="打包下载" onclick='window.open("<%=luci.dispatcher.build_url('admin/scutclient/scutclient-log.tar')%>")'></td>
 	</tbody>
 </table>
 
