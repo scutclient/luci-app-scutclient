@@ -39,33 +39,14 @@ end
 scut_option = scut:section(TypedSection, "option", translate("选项"))
 scut_option.anonymous = true
 
-scut_option_enable = scut_option:option(Flag, "enable", translate("开机自动启动"))
-scut_option_enable.addremove = false
-scut_option_enable.rmempty = false
-
-scut_option_plugin_redial = scut_option:option(Flag, "plugin_redial", translate("启用插线自动重拨"))
-scut_option_plugin_redial.addremove = false
-scut_option_plugin_redial.rmempty = false
-
-scut_option_mode = scut_option:option(ListValue, "mode", translate("客户端选择"))
-scut_option_mode.rmempty = false
---scut_option_mode:value("Young") -- No longer be used
-scut_option_mode:value("Drcom")
-scut_option_mode.default = "Drcom"
-
+scut_option:option(Flag, "enable", "启用")
+scut_option:option(Flag, "plugin_redial", "启用插线自动重拨", "仅部分路由器支持此功能")
 
 -- config scutclient
 scut_client = scut:section(TypedSection, "scutclient", translate("用户信息"))
 scut_client.anonymous = true
-
-scut_client_username = scut_client:option(Value, "username", translate("拨号用户名"), translate("学校提供的用户名，一般是学号"))
-scut_client_username.rmempty = false
-
-scut_client_password = scut_client:option(Value, "password", translate("拨号密码"))
-scut_client_password.rmempty = false
-scut_client_password.password = true
-
-
+scut_client:option(Value, "username", "拨号用户名", "学校提供的用户名，一般是学号")
+scut_client:option(Value, "password", "拨号密码").password = true
 
 -- config drcom
 scut_drcom = scut:section(TypedSection, "drcom", translate("Drcom设置"))
@@ -118,13 +99,5 @@ local dhcp_hostnames = string.split(luci.sys.exec("cat /tmp/dhcp.leases|awk {'pr
 scut_drcom_hostname:value(random_hostname)
 scut_drcom_hostname:value(dhcp_hostnames[1])
 scut_drcom_hostname.default = random_hostname
-
-scut_drcom_delay = scut_drcom:option(Value, "delay", translate("开机延时（秒）后拨号"))
-scut_drcom_delay.rmempty = false
-scut_drcom_delay.datatype  = "integer"
-scut_drcom_delay:value("2")
-scut_drcom_delay:value("10")
-scut_drcom_delay:value("30")
-scut_drcom_delay.default="2"
 
 return scut
