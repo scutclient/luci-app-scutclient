@@ -2,37 +2,27 @@
 -- 华工路由群 262939451
 scut = Map(
 	"scutclient",
-	translate("华南理工大学客户端 设置"),
+	"华南理工大学客户端 设置",
 	' <input style="margin: 2px;" class="cbi-button cbi-button-apply" type="button" value="'
-	..translate("Step 1 : 点此处去设置Wi-Fi")
+	.."Step 1 : 点此处去设置Wi-Fi"
 	..'" onclick="javascript:location.href=\''
 	..luci.dispatcher.build_url("admin/network/wireless/radio0.network1")
 	..'\'"/>'
 	..' <input style="margin: 2px;" class="cbi-button cbi-button-apply" type="button" value="'
-	..translate("Step 2 : 点此处去设置IP")
+	.."Step 2 : 点此处去设置IP"
 	..'" onclick="javascript:location.href=\''
 	..luci.dispatcher.build_url("admin/network/network/wan")
 	..'\'"/>'
 	..' <input style="margin: 2px;" class="cbi-button cbi-button-apply" type="button" value="'
-	..translate("Step 3 : 点此处去设置定时任务")
-	..'" onclick="javascript:location.href=\''
-	..luci.dispatcher.build_url("admin/system/crontab")
-	..'\'"/>'
-	..' <input style="margin: 2px;" class="cbi-button cbi-button-apply" type="button" value="'
-	..translate("Step 4 : 点此处去修改路由时间及时区")
-	..'" onclick="javascript:location.href=\''
-	..luci.dispatcher.build_url("admin/system/system")
-	..'\'"/>'
-	..' <input style="margin: 2px;" class="cbi-button cbi-button-apply" type="button" value="'
-	..translate("Step 5 : 点此处去修改路由器管理密码")
+	.."Step 3 : 点此处去修改路由器管理密码"
 	..'" onclick="javascript:location.href=\''
 	..luci.dispatcher.build_url("admin/system/admin")
 	..'\'"/>'
 )
 function scut.on_commit(self)
-	os.execute("/etc/init.d/scutclient enable")
-	os.execute("/etc/init.d/scutclient stop > /dev/null")
-	os.execute("/etc/init.d/scutclient start > /dev/null")
+	luci.sys.call("uci set scutclient.@luci[-1].configured=1")
+	luci.sys.call("uci commit")
+	luci.sys.call("rm -rf /tmp/luci-*")
 end
 
 -- config option
@@ -43,16 +33,16 @@ scut_option:option(Flag, "enable", "启用")
 scut_option:option(Flag, "plugin_redial", "启用插线自动重拨", "仅部分路由器支持此功能")
 
 -- config scutclient
-scut_client = scut:section(TypedSection, "scutclient", translate("用户信息"))
+scut_client = scut:section(TypedSection, "scutclient", "用户信息")
 scut_client.anonymous = true
 scut_client:option(Value, "username", "拨号用户名", "学校提供的用户名，一般是学号")
 scut_client:option(Value, "password", "拨号密码").password = true
 
 -- config drcom
-scut_drcom = scut:section(TypedSection, "drcom", translate("Drcom设置"))
+scut_drcom = scut:section(TypedSection, "drcom", "Drcom设置")
 scut_drcom.anonymous = true
 
-scut_drcom_version = scut_drcom:option(Value, "version", translate("Drcom版本"))
+scut_drcom_version = scut_drcom:option(Value, "version", "Drcom版本")
 scut_drcom_version.rmempty = false
 scut_drcom_version:value("4472434f4d0096022a")
 scut_drcom_version:value("4472434f4d0096022a00636b2031")

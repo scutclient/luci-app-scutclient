@@ -29,10 +29,8 @@ mode_links.redial = mode_links.base.."?redial=1"
 mode_links.logoff = mode_links.base.."?logoff=1"
 mode_links.move_tag = mode_links.base .."?move_tag=1"
 
-function page_has_moved()
-	return string.find(luci.sys.exec("cat /usr/lib/lua/luci/controller/scutclient.lua|grep -o tagforsed|grep -c tagforsed"), "2")
-		and false
-		or true
+function page_moved()
+	return (uci:get_first("scutclient", "luci", "mainorder", 10) == 10)
 end
 
 function get_wan_port()
@@ -157,7 +155,7 @@ end
 				<td>
 					<a href="<%=mode_links.logoff%>">下线</a>
 					<a href="<%=mode_links.redial%>">重拨</a>
-					<% if page_has_moved() then %>
+					<% if page_moved() then %>
 					<a href="<%=mode_links.move_tag%>">我不想每次打开都见到这个界面把它移走</a>
 					<% end %>
 				</td>

@@ -1,6 +1,5 @@
 module("luci.controller.scutclient", package.seeall)
 
-uci  = require "luci.model.uci".cursor()
 http = require "luci.http"
 fs = require "nixio.fs"
 sys  = require "luci.sys"
@@ -8,29 +7,49 @@ sys  = require "luci.sys"
 log_file = "/tmp/scutclient.log"
 log_file_backup = "/tmp/scutclient.log.backup.log"
 
-
 function index()
 	if not fs.access("/etc/config/scutclient") then
 		return
 	end
+	local uci = require "luci.model.uci".cursor()
+	local mainorder = uci:get_first("scutclient", "luci", "mainorder", 10)
+	if not uci:get_first("scutclient", "luci", "configured", false) then
 		entry({"admin", "scutclient"},
 			alias("admin", "scutclient", "settings"),
-			translate("华南理工大学客户端"),
-			10  --tagforsed
+			"华南理工大学客户端",
+			mainorder
 		)
 
 		entry({"admin", "scutclient", "settings"},
 			cbi("scutclient/scutclient"),
-			translate("设置"),
+			"设置",
 			10
 		).leaf = true
 
 		entry({"admin", "scutclient", "status"},
 			call("action_status"),
-			translate("状态"),
+			"状态",
 			20
 		).leaf = true
+	else
+		entry({"admin", "scutclient"},
+			alias("admin", "scutclient", "status"),
+			"华南理工大学客户端",
+			mainorder
+		)
 
+		entry({"admin", "scutclient", "status"},
+			call("action_status"),
+			"状态",
+			10
+		).leaf = true
+
+		entry({"admin", "scutclient", "settings"},
+			cbi("scutclient/scutclient"),
+			"设置",
+			20
+		).leaf = true
+	end
 		entry({"admin", "scutclient", "logs"},
 			template("scutclient/logs"),
 			translate("日志"),
@@ -83,7 +102,8 @@ function action_status()
 		luci.sys.call("/etc/init.d/scutclient start > /dev/null")
 	end
 	if luci.http.formvalue("move_tag") == "1" then
-		luci.sys.call("sed -i 's/10 *--tagforsed/90    -- change it to 10 to move it back/' /usr/lib/lua/luci/controller/scutclient.lua")
+		luci.sys.call("uci set scutclient.@luci[-1].mainorder=90")
+		luci.sys.call("uci commit")
 		luci.sys.call("rm -rf /tmp/luci-*")
 	end
 end
