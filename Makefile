@@ -8,5 +8,5 @@ include $(TOPDIR)/rules.mk
 LUCI_TITLE:=LuCI Support for scutclient
 LUCI_DEPENDS:=+scutclient
 PKG_VERSION:=2.0
-include ../../luci.mk
+include $(TOPDIR)/feeds/luci/luci.mk
 # call BuildPackage - OpenWrt buildroot signature
