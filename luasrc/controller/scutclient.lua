@@ -51,8 +51,9 @@ function index()
 		).leaf = true
 	end
 	entry({"admin", "scutclient", "logs"}, template("scutclient/logs"), "日志", 30).leaf = true
-	entry({"admin", "scutclient", "about"}, call("action_about"), "关于"), 40).leaf = true
+	entry({"admin", "scutclient", "about"}, call("action_about"), "关于", 40).leaf = true
 	entry({"admin", "scutclient", "get_log"}, call("get_log"))
+	entry({"admin", "scutclient", "netstat"}, call("get_netstat"))
 	entry({"admin", "scutclient", "scutclient-log.tar"}, call("get_dbgtar"))
 end
 
@@ -69,7 +70,6 @@ function get_log()
 	http.write(client_log)
 	http.close()
 end
-
 
 function action_about()
 	luci.template.render("scutclient/about")
@@ -92,6 +92,20 @@ function action_status()
 	end
 end
 
+function get_netstat()
+	local hcontent = sys.exec("wget -O- http://whatismyip.akamai.com 2>/dev/null | head -n1")
+	local nstat = {}
+	if hcontent == '' then
+		nstat.stat = 'no_internet'
+	elseif hcontent:find("(%d+)%.(%d+)%.(%d+)%.(%d+)") then
+		nstat.stat = 'internet'
+	else
+		nstat.stat = 'no_login'
+	end
+	http.prepare_content("application/json")
+	http.write_json(nstat)
+	http.close()
+end
 
 function get_dbgtar()
 
