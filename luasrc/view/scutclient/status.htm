@@ -132,6 +132,10 @@ end
 				<td width="33%"><strong>MAC</strong></td>
 				<td id="status_macaddr"><%=network_status.macaddr%></td>
 			</tr>
+			<tr class="cbi-section-table-row cbi-rowstyle-1">
+				<td width="33%"><strong>网络状态</strong></td>
+				<td id="status_net">获取中……</td>
+			</tr>
 			<% end %>
 
 		</tbody>
@@ -282,6 +286,23 @@ end
 		}
 	}
 
+XHR.get('<%=luci.dispatcher.build_url("admin", "scutclient", "netstat")%>', null, function(xhr, res) {
+	var statstr = "网络状态获取错误！";
+	var statelem = document.getElementById("status_net");
+	if (res !== null && typeof(res) === 'object') {
+		if (res['stat'] == 'internet') {
+			statstr = "网络正常";
+			statelem.style = "color: green";
+		} else if (res['stat'] == 'no_login') {
+			statstr = "校园网未登录";
+			statelem.style = "color: #FFA500";
+		} else if (res['stat'] == 'no_internet') {
+			statstr = "网络错误！检查网线/IP设置！";
+			statelem.style = "color: red";
+		}
+	}
+	statelem.innerHTML = statstr;
+});
 
 </script>
 <%+footer%>
