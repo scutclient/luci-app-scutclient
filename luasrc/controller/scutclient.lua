@@ -50,26 +50,10 @@ function index()
 			20
 		).leaf = true
 	end
-		entry({"admin", "scutclient", "logs"},
-			template("scutclient/logs"),
-			translate("日志"),
-			30
-		).leaf = true
-
-		entry({"admin", "scutclient", "about"},
-			call("action_about"),
-			translate("关于"),
-			40
-		).leaf = true
-
-		-- 实时刷日志
-		entry({"admin", "scutclient", "get_log"},
-			call("get_log")
-		)
-
-		entry({"admin", "scutclient", "scutclient-log.tar"},
-			call("get_dbgtar")
-		)
+	entry({"admin", "scutclient", "logs"}, template("scutclient/logs"), "日志", 30).leaf = true
+	entry({"admin", "scutclient", "about"}, call("action_about"), "关于"), 40).leaf = true
+	entry({"admin", "scutclient", "get_log"}, call("get_log"))
+	entry({"admin", "scutclient", "scutclient-log.tar"}, call("get_dbgtar"))
 end
 
 
