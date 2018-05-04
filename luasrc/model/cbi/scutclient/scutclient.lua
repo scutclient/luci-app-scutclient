@@ -30,7 +30,6 @@ scut_option = scut:section(TypedSection, "option", translate("选项"))
 scut_option.anonymous = true
 
 scut_option:option(Flag, "enable", "启用")
-scut_option:option(Flag, "plugin_redial", "启用插线自动重拨", "仅部分路由器支持此功能")
 
 -- config scutclient
 scut_client = scut:section(TypedSection, "scutclient", "用户信息")
