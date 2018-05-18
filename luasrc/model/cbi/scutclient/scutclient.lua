@@ -22,7 +22,7 @@ scut = Map(
 function scut.on_commit(self)
 	luci.sys.call("uci set scutclient.@luci[-1].configured=1")
 	luci.sys.call("uci commit")
-	luci.sys.call("rm -rf /tmp/luci-*")
+	luci.sys.call("rm -rf /tmp/luci-*cache")
 end
 
 -- config option

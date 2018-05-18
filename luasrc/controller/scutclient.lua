@@ -88,7 +88,7 @@ function action_status()
 	if luci.http.formvalue("move_tag") == "1" then
 		luci.sys.call("uci set scutclient.@luci[-1].mainorder=90")
 		luci.sys.call("uci commit")
-		luci.sys.call("rm -rf /tmp/luci-*")
+		luci.sys.call("rm -rf /tmp/luci-*cache")
 	end
 end
 
