@@ -16,7 +16,6 @@ if #wandnsl > 0 then
 end
 local scutclient_status = {}
 scutclient_status.enable = uci:get_first("scutclient", "option", "enable")
-scutclient_status.client = uci:get_first("scutclient", "option", "client")
 scutclient_status.username = uci:get_first("scutclient", "scutclient", "username")
 scutclient_status.password = uci:get_first("scutclient", "scutclient", "password")
 scutclient_status.hostname = uci:get_first("scutclient", "drcom", "hostname")
@@ -181,11 +180,6 @@ end
 			<tr class="cbi-section-table-row cbi-rowstyle-1">
 				<td width="33%"><strong>密码</strong></td>
 				<td><%=scutclient_status.password%></td>
-			</tr>
-
-			<tr class="cbi-section-table-row cbi-rowstyle-2">
-				<td width="33%"><strong>认证模式</strong></td>
-				<td><%=scutclient_status.client%></td>
 			</tr>
 
 			<tr class="cbi-section-table-row cbi-rowstyle-1">
