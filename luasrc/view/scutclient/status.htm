@@ -9,11 +9,6 @@ local ipkg = require "luci.model.ipkg"
 local ntm = require "luci.model.network".init()
 local wan = ntm:get_wannet()
 local wandev = ntm:get_wandev()
-local wandns = ""
-local wandnsl = wan:dnsaddrs()
-if #wandnsl > 0 then
-	wandns = table.concat(wandnsl, ",")
-end
 local scutclient_status = {}
 scutclient_status.enable = uci:get_first("scutclient", "option", "enable")
 scutclient_status.username = uci:get_first("scutclient", "scutclient", "username")
@@ -110,7 +105,7 @@ end
 
 			<tr class="cbi-section-table-row cbi-rowstyle-1">
 				<td width="33%"><strong>DNS</strong></td>
-				<td id="status_dns"><%=wandns%></td>
+				<td id="status_dns"><%=table.concat(wan:dnsaddrs(), ",")%></td>
 			</tr>
 
 			<tr class="cbi-section-table-row cbi-rowstyle-2">
