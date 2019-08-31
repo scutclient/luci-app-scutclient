@@ -7,8 +7,7 @@ local fs = require "nixio.fs"
 local uci = require "luci.model.uci".cursor()
 local ipkg = require "luci.model.ipkg"
 local ntm = require "luci.model.network".init()
-local wan = ntm:get_wannet()
-local wandev = ntm:get_wandev()
+local wan = ntm:get_wan_networks()[1]
 local scutclient_status = {}
 scutclient_status.enable = uci:get_first("scutclient", "option", "enable")
 scutclient_status.username = uci:get_first("scutclient", "scutclient", "username")
@@ -85,7 +84,7 @@ end
 			<% if wan then %>
 			<tr class="cbi-section-table-row cbi-rowstyle-1">
 				<td width="33%">WAN口</td>
-				<td><%=wandev:name()%></td>
+				<td><%=wan:ifname()%></td>
 			</tr>
 
 			<tr class="cbi-section-table-row cbi-rowstyle-2" id="all_status_ipaddr">
@@ -110,7 +109,7 @@ end
 
 			<tr class="cbi-section-table-row cbi-rowstyle-2">
 				<td width="33%"><strong>MAC</strong></td>
-				<td id="status_macaddr"><%=wandev:mac()%></td>
+				<td id="status_macaddr"><%=ntm:get_interface(wan:ifname()):mac()%></td>
 			</tr>
 			<tr class="cbi-section-table-row cbi-rowstyle-1">
 				<td width="33%"><strong>网络状态</strong></td>
