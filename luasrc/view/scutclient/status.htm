@@ -16,7 +16,7 @@ scutclient_status.version = uci:get_first("scutclient", "drcom", "version")
 scutclient_status.hash = uci:get_first("scutclient", "drcom", "hash")
 scutclient_status.server_auth_ip = uci:get_first("scutclient", "drcom", "server_auth_ip")
 local mode_links = {}
-mode_links.base = luci.dispatcher.build_url("admin/scutclient/status")
+mode_links.base = luci.dispatcher.build_url("admin/services/scutclient/status")
 mode_links.redial = mode_links.base.."?redial=1"
 mode_links.logoff = mode_links.base.."?logoff=1"
 mode_links.move_tag = mode_links.base .."?move_tag=1"
@@ -266,7 +266,7 @@ end
 		}
 	}
 
-XHR.get('<%=luci.dispatcher.build_url("admin", "scutclient", "netstat")%>', null, function(xhr, res) {
+XHR.get('<%=luci.dispatcher.build_url("admin", "services", "scutclient", "netstat")%>', null, function(xhr, res) {
 	var statstr = "网络状态获取错误！";
 	var statelem = document.getElementById("status_net");
 	if (res !== null && typeof(res) === 'object') {
