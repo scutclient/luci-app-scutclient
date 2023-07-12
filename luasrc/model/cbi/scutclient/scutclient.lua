@@ -18,7 +18,7 @@ scut = Map(
 				..' <input style="margin: 2px;" class="cbi-button cbi-button-apply" type="button" value="'
 				.."Step 2 : 点此处去设置IP"
 				..'" onclick="javascript:location.href=\''
-				..luci.dispatcher.build_url("admin/network/network/wan")
+				..luci.dispatcher.build_url("admin/network/network")
 				..'\'"/>'
 				..' <input style="margin: 2px;" class="cbi-button cbi-button-apply" type="button" value="'
 				.."Step 3 : 点此处去修改路由器管理密码"
