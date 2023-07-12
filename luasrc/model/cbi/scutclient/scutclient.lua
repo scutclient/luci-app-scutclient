@@ -1,23 +1,30 @@
 -- LuCI by libc0607 (libc0607@gmail.com)
 -- 华工路由群 262939451
+-- 抄的
+string.split = function(s, p)
+	local rt = {}
+	string.gsub(s, '[^'..p..']+', function(w) table.insert(rt, w) end)
+	return rt
+end
+
 scut = Map(
-	"scutclient",
-	"华南理工大学客户端 设置",
-	' <input style="margin: 2px;" class="cbi-button cbi-button-apply" type="button" value="'
-	.."Step 1 : 点此处去设置Wi-Fi"
-	..'" onclick="javascript:location.href=\''
-	..luci.dispatcher.build_url("admin/network/wireless/radio0.network1")
-	..'\'"/>'
-	..' <input style="margin: 2px;" class="cbi-button cbi-button-apply" type="button" value="'
-	.."Step 2 : 点此处去设置IP"
-	..'" onclick="javascript:location.href=\''
-	..luci.dispatcher.build_url("admin/network/network/wan")
-	..'\'"/>'
-	..' <input style="margin: 2px;" class="cbi-button cbi-button-apply" type="button" value="'
-	.."Step 3 : 点此处去修改路由器管理密码"
-	..'" onclick="javascript:location.href=\''
-	..luci.dispatcher.build_url("admin/system/admin")
-	..'\'"/>'
+		"scutclient",
+		"华南理工大学客户端 设置",
+		' <input style="margin: 2px;" class="cbi-button cbi-button-apply" type="button" value="'
+				.."Step 1 : 点此处去设置Wi-Fi"
+				..'" onclick="javascript:location.href=\''
+				..luci.dispatcher.build_url("admin/network/wireless/radio0.network1")
+				..'\'"/>'
+				..' <input style="margin: 2px;" class="cbi-button cbi-button-apply" type="button" value="'
+				.."Step 2 : 点此处去设置IP"
+				..'" onclick="javascript:location.href=\''
+				..luci.dispatcher.build_url("admin/network/network/wan")
+				..'\'"/>'
+				..' <input style="margin: 2px;" class="cbi-button cbi-button-apply" type="button" value="'
+				.."Step 3 : 点此处去修改路由器管理密码"
+				..'" onclick="javascript:location.href=\''
+				..luci.dispatcher.build_url("admin/system/admin")
+				..'\'"/>'
 )
 function scut.on_commit(self)
 	luci.sys.call("uci set scutclient.@luci[-1].configured=1")
@@ -57,6 +64,22 @@ scut_drcom_server = scut_drcom:option(Value, "server_auth_ip", translate("服务
 scut_drcom_server.rmempty = false
 scut_drcom_server.datatype = "ip4addr"
 scut_drcom_server:value("202.38.210.131")
+scut_drcom_nettime = scut_drcom:option(Value, "nettime", translate("允许上网时间"))
+scut_drcom_nettime.description = "允许的上网时间，断网后等待到指定时间重新开始认证。如6:15"
+scut_drcom_nettime.validate = function(self, value, t)
+	if (string.find(value, ":")) then
+		local sp = string.split(value, ":")
+
+		if (#sp == 2) then
+			local hour, minute = tonumber(sp[1]), tonumber(sp[2])
+			if (hour and minute and hour >= 0 and hour < 12 and minute >= 0 and minute < 60) then
+				return value
+			end
+		end
+	end
+
+	return nil, "上网时间格式错误！"
+end
 
 --[[ 主机名列表预置
     1.生成一个 DESKTOP-XXXXXXX 的随机
@@ -67,19 +90,13 @@ scut_drcom_hostname.rmempty = false
 
 local random_hostname = "DESKTOP-"
 local randtmp
--- 抄的
-string.split = function(s, p)
-    local rt = {}
-    string.gsub(s, '[^'..p..']+', function(w) table.insert(rt, w) end)
-    return rt
-end
 
 math.randomseed(os.time())
 for i = 1, 7 do
 	randtmp = math.random(1, 36)
-  random_hostname = (randtmp > 10)
-    and random_hostname..string.char(randtmp+54)
-    or  random_hostname..string.char(randtmp+47)
+	random_hostname = (randtmp > 10)
+			and random_hostname..string.char(randtmp+54)
+			or  random_hostname..string.char(randtmp+47)
 end
 
 -- 获取dhcp列表，加入第一个主机名候选
