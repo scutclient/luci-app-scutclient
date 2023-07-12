@@ -33,10 +33,6 @@ else
 	wandev = ntm:get_wandev()
 end
 
-function page_moved()
-	return (uci:get_first("scutclient", "luci", "mainorder", 10) == 10)
-end
-
 function get_client_status(exec_name)
 	return (os.execute("pidof scutclient > /dev/null 2>/dev/null") == 0)
 end
@@ -144,9 +140,6 @@ end
 				<td>
 					<a href="<%=mode_links.logoff%>">下线</a>
 					<a href="<%=mode_links.redial%>">重拨</a>
-					<% if page_moved() then %>
-					<a href="<%=mode_links.move_tag%>">我不想每次打开都见到这个界面把它移走</a>
-					<% end %>
 				</td>
 			</tr>
 

@@ -13,43 +13,25 @@ function index()
 	end
 	local uci = require "luci.model.uci".cursor()
 	local mainorder = uci:get_first("scutclient", "luci", "mainorder", 10)
-	if not uci:get_first("scutclient", "luci", "configured", false) then
-		entry({"admin", "services", "scutclient"},
-			alias("admin", "services", "scutclient", "settings"),
-			"华南理工大学客户端",
-			mainorder
-		)
 
-		entry({"admin", "services", "scutclient", "settings"},
-			cbi("scutclient/scutclient"),
-			"设置",
-			10
-		).leaf = true
+	entry({"admin", "services", "scutclient"},
+		alias("admin", "services", "scutclient", "settings"),
+		"华南理工大学客户端",
+		mainorder
+	)
 
-		entry({"admin", "services", "scutclient", "status"},
-			call("action_status"),
-			"状态",
-			20
-		).leaf = true
-	else
-		entry({"admin", "services", "scutclient"},
-			alias("admin", "services", "scutclient", "status"),
-			"华南理工大学客户端",
-			mainorder
-		)
+	entry({"admin", "services", "scutclient", "settings"},
+		cbi("scutclient/scutclient"),
+		"设置",
+		10
+	).leaf = true
 
-		entry({"admin", "services", "scutclient", "status"},
-			call("action_status"),
-			"状态",
-			10
-		).leaf = true
+	entry({"admin", "services", "scutclient", "status"},
+		call("action_status"),
+		"状态",
+		20
+	).leaf = true
 
-		entry({"admin", "services", "scutclient", "settings"},
-			cbi("scutclient/scutclient"),
-			"设置",
-			20
-		).leaf = true
-	end
 	entry({"admin", "services", "scutclient", "logs"}, template("scutclient/logs"), "日志", 30).leaf = true
 	entry({"admin", "services", "scutclient", "about"}, call("action_about"), "关于", 40).leaf = true
 	entry({"admin", "services", "scutclient", "get_log"}, call("get_log"))
