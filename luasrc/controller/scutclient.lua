@@ -15,7 +15,7 @@ function index()
 	local mainorder = uci:get_first("scutclient", "luci", "mainorder", 10)
 	if not uci:get_first("scutclient", "luci", "configured", false) then
 		entry({"admin", "services", "scutclient"},
-			alias("admin", "scutclient", "settings"),
+			alias("admin", "services", "scutclient", "settings"),
 			"华南理工大学客户端",
 			mainorder
 		)
